@@ -34,4 +34,4 @@ end
 
 function love.draw()
     love.graphics.draw(character.sprite, character.x, character.y, 0, 4, 4)
-end
+end 
