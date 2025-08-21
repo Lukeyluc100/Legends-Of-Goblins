@@ -16,7 +16,7 @@ function love.load()
     Enemy.x = 800
     Enemy.Health = 100
     Enemy.Alive = true
-    Enemy.AttackDamage = love.math.random(10, 15)
+    Enemy.AttackDamage = love.math.random(10, 16)
 
     Player = {}
 
@@ -96,7 +96,7 @@ end
 
 function love.mousepressed(x, y, button)
     if button == 1 then
-        if x > 400 and x < 450 and y > 400 and y < 440 then
+        if x > 400 and x < 500 and y > 400 and y < 500 then
             if Player.Alive then
                 Enemy.Health = Enemy.Health -Player.AttackDamage
                 state = "Enemy Attack"
