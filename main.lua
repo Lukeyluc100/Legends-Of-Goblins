@@ -3,7 +3,7 @@
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
 
-
+    PixelFont = love.graphics.NewFont('assets/Fonts/Pixelparadise-Regular.ttf', 1)
 
     
     state = "Player Attack"
@@ -63,6 +63,7 @@ end
 
 function love.draw()
     love.graphics.setColor(100, 0, 0)
+    love.graphics.setFont(PixelFont)
 
 
     if Enemy.Alive then    
