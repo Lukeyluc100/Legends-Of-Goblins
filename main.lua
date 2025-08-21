@@ -3,7 +3,8 @@
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
 
-    PixelFont = love.graphics.NewFont('assets/Fonts/Pixelparadise-Regular.ttf', 1)
+    PixelFont = love.graphics.newFont('assets/fonts/PixelFont.ttf', 24)
+    print(PixelFont:hasGlyphs("0123456789"))
 
     
     state = "Player Attack"
@@ -79,17 +80,17 @@ function love.draw()
     love.graphics.setColor(100, 100, 100)
 
     if Player.Alive then    
-    love.graphics.print(Player.Health, 80, 350, 0, 2, 2)
+    love.graphics.print(Player.Health, 80, 350, 0, 1, 1)
     end
 
     if Enemy.Alive then
-        love.graphics.print(Enemy.Health, 630, 50, 0, 2, 2)
+        love.graphics.print(Enemy.Health, 630, 50, 0, 1, 1)
     end
 
     
 
     love.graphics.rectangle("line", 400, 400, 100, 40)
-    love.graphics.print("Attack", 410, 410, 0, 2, 2)
+    love.graphics.print("Attack", 410, 410, 0, 1, 1)
 end
 
 
