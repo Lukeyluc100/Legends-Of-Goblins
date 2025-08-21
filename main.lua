@@ -8,8 +8,6 @@ function love.load()
     
     state = "Player Attack"
 
-
-
     Enemy = {}
 
     Enemy.y = -150
