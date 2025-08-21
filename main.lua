@@ -121,11 +121,11 @@ function love.draw()
     end
 
     if state == "BattleWon" then
-        love.graphics.print("You Won", 400, 300)
+        love.graphics.print("You Won", 350, 300)
     end
 
     if state == "Lose" then
-        love.graphics.print("You Lose", 400, 300)
+        love.graphics.print("You Lose", 350, 300)
     end
 
     love.graphics.draw(AttackButtonSprite, 400, 400, 0, 2, 2)
@@ -147,7 +147,7 @@ function love.mousepressed(x, y, button)
         and y >= DefendbuttonY and y <= DefendbuttonY + DefendbuttonHeight then
             if Player.Alive then
 
-                Player.Defence = Player.Defence + love.math.random(5,10)
+                Player.Defence = Player.Defence + love.math.random(8,14)
                 state = "Enemy Attack"
                 EnemyState()
             end
