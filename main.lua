@@ -147,7 +147,7 @@ function love.mousepressed(x, y, button)
         and y >= DefendbuttonY and y <= DefendbuttonY + DefendbuttonHeight then
             if Player.Alive then
 
-                Player.Defence = Player.Defence + love.math.random(8,14)
+                Player.Defence = Player.Defence + love.math.random(8, 10,14)
                 state = "Enemy Attack"
                 EnemyState()
             end
