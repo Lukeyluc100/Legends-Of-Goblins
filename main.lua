@@ -1,12 +1,33 @@
 
 
 function love.load()
+    anim8 = require('libraris/anim8')
 
     -- Load Sprites
     love.graphics.setDefaultFilter("nearest", "nearest")
     PixelFont = love.graphics.newFont('assets/fonts/PixelFont.ttf', 24)
-    AttackButtonSprite = love.graphics.newImage('assets/AttackButton.png')
+
+
+
+
+
+
+    AttackButtonSpriteSheet = love.graphics.newImage('assets/AttackButton.png')
+
+
+
+
+    
     DefendButtonSprite = love.graphics.newImage('assets/DefendButton.png')
+
+
+
+
+
+
+
+
+
     LargeTextBox = love.graphics.newImage('assets/LargeTextBox.png')
 
 
@@ -25,6 +46,9 @@ function love.load()
     Enemy.Health = 100
     Enemy.Alive = true
     Enemy.AttackDamage = love.math.random(10, 16)
+    Enemy.Timer = 0.5
+
+
 
     Player = {}
 
@@ -33,7 +57,7 @@ function love.load()
     Player.Health = 100
     Player.Defence = 0
     Player.Alive = true
-    Player.AttackDamage = love.math.random(10, 13, 19)
+    Player.AttackDamage = love.math.random(14, 20)
 
 
 
@@ -56,7 +80,9 @@ end
 
 
 function love.update(dt)
-
+-------------------------------------------------------
+--                      INTRO                        --
+-------------------------------------------------------
 
     local EnemyLocalX = 600
     local EnemyLocalY = 300
@@ -69,6 +95,9 @@ function love.update(dt)
 
     Player.x = lerp(Player.x, PlayerLocalX, 2 * dt)
     Player.y = lerp(Player.y, PlayerLocalY, 2 * dt)
+-----------------------------------------------------
+--                  DEATH CHECK                    --
+-----------------------------------------------------
 
     if Enemy.Health < 1 then
         Enemy.Alive = false
@@ -78,6 +107,12 @@ function love.update(dt)
         Player.Alive = false
     end
 
+
+
+
+-----------------------------------------------------
+--                 WIN OR LOSE?                    --
+-----------------------------------------------------
     if Enemy.Alive == false then
 
         state = "BattleWon"
@@ -103,7 +138,7 @@ function love.update(dt)
 
     end
 
-
+    EnemyState(dt)
 end
 
 function love.draw()
@@ -111,7 +146,7 @@ function love.draw()
 
     --Draw UI
     love.graphics.draw(LargeTextBox, 0, 400, 0, 6.25, 3)
-    -------------------------------------
+
     love.graphics.setColor(100, 0, 0)
 
     if Enemy.Alive then    
@@ -125,7 +160,9 @@ function love.draw()
     end
 
     love.graphics.setColor(100, 100, 100)
-
+-----------------------------------------------------
+--                HEALTH BARS                      --
+-----------------------------------------------------
     if Player.Alive then    
     love.graphics.print("HP " ..Player.Health, 130, 150, 0, 1, 1)
     end
@@ -134,6 +171,14 @@ function love.draw()
         love.graphics.print("HP " ..Enemy.Health, 630, 150, 0, 1, 1)
     end
 
+
+
+
+
+
+-----------------------------------------------------
+--               WIN LOSE TEXT                     --
+-----------------------------------------------------
     if state == "BattleWon" then
         love.graphics.print("You Won", 350, 300)
     end
@@ -142,47 +187,65 @@ function love.draw()
         love.graphics.print("You Lose", 350, 300)
     end
 
+
+
+
+-----------------------------------------------------
+--               DRAW BUTTONS                      --
+-----------------------------------------------------
+
     love.graphics.draw(AttackButtonSprite, 610, 430, 0, 3.25, 3.25)
     love.graphics.draw(DefendButtonSprite, 610, 500, 0, 3.25, 3.25)
 end
 
 
 function love.mousepressed(x, y, button)
-    if button == 1 then
-        if x >= AttackbuttonX and x <= AttackbuttonX + AttackbuttonWidth
-        and y >= AttackbuttonY and y <= AttackbuttonY + AttackbuttonHeight then
-            if Player.Alive then
-                Enemy.Health = Enemy.Health -Player.AttackDamage
-                state = "Enemy Attack"
-                EnemyState()
+    if state == "Player Attack" then
+        if button == 1 then
+            if x >= AttackbuttonX and x <= AttackbuttonX + AttackbuttonWidth
+            and y >= AttackbuttonY and y <= AttackbuttonY + AttackbuttonHeight then
+                if Player.Alive then
+                    Enemy.Health = Enemy.Health -Player.AttackDamage
+                    state = "Enemy Attack"
+                end
             end
-        end
     
-        if x >= DefendbuttonX and x <= DefendbuttonX + DefendbuttonWidth
-        and y >= DefendbuttonY and y <= DefendbuttonY + DefendbuttonHeight then
-            if Player.Alive then
+            if x >= DefendbuttonX and x <= DefendbuttonX + DefendbuttonWidth
+            and y >= DefendbuttonY and y <= DefendbuttonY + DefendbuttonHeight then
+                if Player.Alive then
 
-                Player.Defence = Player.Defence + love.math.random(8, 10,14)
-                state = "Enemy Attack"
-                EnemyState()
+                    Player.Defence = Player.Defence + love.math.random(8, 10,14)
+                    state = "Enemy Attack"
+                end
             end
         end
     end
-
-
 end
 
 
 
 
 
-function EnemyState()
-        if Enemy.Alive then
-            
+function EnemyState(dt)
+    if state == "Enemy Attack" then
+        if state ~= "Player Attack" then  -- Schreibweise angleichen
+            if Enemy.Timer > 0 then
+                Enemy.Timer = Enemy.Timer - dt
+            end
+            if Enemy.Timer <= 0 then
+                EnemyAttacking()
+            end
+        end
+    end
+end
+
+function EnemyAttacking()
+    if Enemy.Alive then
+        if state == "Enemy Attack" then
             Player.Health = Player.Health - Enemy.AttackDamage + Player.Defence
             Player.Defence = 0
-            State = "Player Attack"
+            state = "Player Attack"  -- klein schreiben, wie oben geprüft
+            Enemy.Timer = 0.5
         end
-    
+    end
 end
-
