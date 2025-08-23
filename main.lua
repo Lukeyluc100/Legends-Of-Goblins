@@ -6,7 +6,7 @@ function love.load()
     -- Load Sprites
     love.graphics.setDefaultFilter("nearest", "nearest")
     PixelFont = love.graphics.newFont('assets/fonts/PixelFont.ttf', 24)
-
+    Background = love.graphics.newImage('assets/BackgroundImage.png')
 
 
 
@@ -47,23 +47,24 @@ function love.load()
 
     Enemy = {}
 
-    Enemy.y = 300
+    Enemy.y = 176
     Enemy.x = 900
     Enemy.Health = 100
     Enemy.Alive = true
     Enemy.AttackDamage = love.math.random(11, 17)
+    Enemy.Sprite = love.graphics.newImage('assets/Ork.png')
     Enemy.Timer = 1
 
 
 
     Player = {}
-
-    Player.y = 300
+    Player.y = 176
     Player.x = -300
     Player.Health = 100
     Player.Defence = 0
     Player.Alive = true
     Player.AttackDamage = love.math.random(14, 20)
+    Player.Sprite = love.graphics.newImage('assets/Lucky.png')
 
 
 
@@ -90,14 +91,14 @@ function love.update(dt)
 --                      INTRO                        --
 -------------------------------------------------------
 
-    local EnemyLocalX = 600
-    local EnemyLocalY = 300
+    local EnemyLocalX = 550
+    local EnemyLocalY = 176
 
     Enemy.x = lerp(Enemy.x, EnemyLocalX, 2 * dt)
     Enemy.y = lerp(Enemy.y, EnemyLocalY, 2 * dt)
 
-    local PlayerLocalX = 100
-    local PlayerLocalY = 300
+    local PlayerLocalX = 50
+    local PlayerLocalY = 176
 
     Player.x = lerp(Player.x, PlayerLocalX, 2 * dt)
     Player.y = lerp(Player.y, PlayerLocalY, 2 * dt)
@@ -124,9 +125,9 @@ function love.update(dt)
         state = "BattleWon"
         Enemy.Health = 100
         Player.Health = 100
-        Player.y = 300
+        Player.y = 176
         Player.x = -800
-        Enemy.y = 300
+        Enemy.y = 176
         Enemy.x = 900
         Enemy.Alive = true
         AttackButtonTable.anim = AttackButtonTable.animations.notpressed
@@ -138,9 +139,9 @@ function love.update(dt)
         Player.Alive = true
         Enemy.Health = 100
         Player.Health = 100
-        Player.y = 300
+        Player.y = 176
         Player.x = -900
-        Enemy.y = 300
+        Enemy.y = 176
         Enemy.x = 900
         Enemy.Alive = true
         AttackButtonTable.anim = AttackButtonTable.animations.notpressed
@@ -155,20 +156,18 @@ end
 
 function love.draw()
     love.graphics.setFont(PixelFont)
+    love.graphics.draw(Background, 0, 0, 0, 14)
 
     --Draw UI
-    love.graphics.draw(LargeTextBox, 0, 400, 0, 6.25, 3)
+    love.graphics.draw(LargeTextBox, 0, 400, 0, 6.25, 3.25)
 
-    love.graphics.setColor(100, 0, 0)
 
     if Enemy.Alive then    
-        love.graphics.rectangle('fill', Enemy.x, Enemy.y, 100, 100)
+        love.graphics.draw(Enemy.Sprite, Enemy.x, Enemy.y, nil, 3.5)
     end
 
-    love.graphics.setColor(0, 0, 100)
-
     if Player.Alive then
-    love.graphics.rectangle('fill', Player.x, Player.y, 100, 100)
+    love.graphics.draw(Player.Sprite, Player.x, Player.y, nil, 3.5)
     end
 
     love.graphics.setColor(100, 100, 100)
@@ -244,7 +243,7 @@ end
 
 function EnemyState(dt)
     if state == "Enemy Attack" then
-        if state ~= "Player Attack" then  -- Schreibweise angleichen
+        if state ~= "Player Attack" then 
             if Enemy.Timer > 0 then
                 Enemy.Timer = Enemy.Timer - dt
             end
@@ -262,7 +261,7 @@ function EnemyAttacking()
         if state == "Enemy Attack" then
             Player.Health = Player.Health - Enemy.AttackDamage + Player.Defence
             Player.Defence = 0
-            state = "Player Attack"  -- klein schreiben, wie oben geprüft
+            state = "Player Attack"
             Enemy.Timer = 1
         end
     end
