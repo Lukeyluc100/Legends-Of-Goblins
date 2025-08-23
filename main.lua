@@ -1,7 +1,7 @@
 
 
 function love.load()
-    anim8 = require('libraris/anim8')
+    anim8 = require('libraries/anim8')
 
     -- Load Sprites
     love.graphics.setDefaultFilter("nearest", "nearest")
@@ -10,17 +10,23 @@ function love.load()
 
 
 
+    AttackButtonTable = {}
 
-
-    AttackButtonSpriteSheet = love.graphics.newImage('assets/AttackButton.png')
-
-
-
-
+    AttackButtonTable.AttackButtonSpriteSheet = love.graphics.newImage('assets/AttackButton.png')
+    AttackButtonTable.grid = anim8.newGrid(46, 18, AttackButtonTable.AttackButtonSpriteSheet:getWidth(), AttackButtonTable.AttackButtonSpriteSheet:getHeight())
+    AttackButtonTable.animations = {}
+    AttackButtonTable.animations.pressed = anim8.newAnimation( AttackButtonTable.grid('2-2', 1), 0.2)
+    AttackButtonTable.animations.notpressed = anim8.newAnimation( AttackButtonTable.grid('1-1', 1), 0.2)
+    AttackButtonTable.anim = AttackButtonTable.animations.notpressed
     
-    DefendButtonSprite = love.graphics.newImage('assets/DefendButton.png')
 
-
+    DefendButtonTable = {}
+    DefendButtonTable.DefendButtonSpriteSheet = love.graphics.newImage('assets/DefendButton.png')
+    DefendButtonTable.grid = anim8.newGrid(46, 18, DefendButtonTable.DefendButtonSpriteSheet:getWidth(), DefendButtonTable.DefendButtonSpriteSheet:getHeight())
+    DefendButtonTable.animations = {}
+    DefendButtonTable.animations.pressed = anim8.newAnimation(DefendButtonTable.grid('2-2', 1), 0.2)
+    DefendButtonTable.animations.notpressed = anim8.newAnimation(DefendButtonTable.grid('1-1', 1), 0.2)
+    DefendButtonTable.anim = DefendButtonTable.animations.notpressed
 
 
 
@@ -45,8 +51,8 @@ function love.load()
     Enemy.x = 900
     Enemy.Health = 100
     Enemy.Alive = true
-    Enemy.AttackDamage = love.math.random(10, 16)
-    Enemy.Timer = 0.5
+    Enemy.AttackDamage = love.math.random(11, 17)
+    Enemy.Timer = 1
 
 
 
@@ -123,6 +129,8 @@ function love.update(dt)
         Enemy.y = 300
         Enemy.x = 900
         Enemy.Alive = true
+        AttackButtonTable.anim = AttackButtonTable.animations.notpressed
+        DefendButtonTable.anim = DefendButtonTable.animations.notpressed
     end
 
     if Player.Alive == false then
@@ -134,11 +142,15 @@ function love.update(dt)
         Player.x = -900
         Enemy.y = 300
         Enemy.x = 900
-        Enemy.Alive = true   
+        Enemy.Alive = true
+        AttackButtonTable.anim = AttackButtonTable.animations.notpressed
+        DefendButtonTable.anim = DefendButtonTable.animations.notpressed
 
     end
 
     EnemyState(dt)
+    AttackButtonTable.anim:update(dt)
+    DefendButtonTable.anim:update(dt)
 end
 
 function love.draw()
@@ -181,10 +193,12 @@ function love.draw()
 -----------------------------------------------------
     if state == "BattleWon" then
         love.graphics.print("You Won", 350, 300)
+        state = "Player Attack"
     end
 
     if state == "Lose" then
         love.graphics.print("You Lose", 350, 300)
+        state = "Player Attack"
     end
 
 
@@ -194,8 +208,8 @@ function love.draw()
 --               DRAW BUTTONS                      --
 -----------------------------------------------------
 
-    love.graphics.draw(AttackButtonSprite, 610, 430, 0, 3.25, 3.25)
-    love.graphics.draw(DefendButtonSprite, 610, 500, 0, 3.25, 3.25)
+    AttackButtonTable.anim:draw(AttackButtonTable.AttackButtonSpriteSheet, 610, 430, 0, 3.25)
+    DefendButtonTable.anim:draw(DefendButtonTable.DefendButtonSpriteSheet, 610, 500, 0, 3.25)
 end
 
 
@@ -205,15 +219,17 @@ function love.mousepressed(x, y, button)
             if x >= AttackbuttonX and x <= AttackbuttonX + AttackbuttonWidth
             and y >= AttackbuttonY and y <= AttackbuttonY + AttackbuttonHeight then
                 if Player.Alive then
+                    AttackButtonTable.anim = AttackButtonTable.animations.pressed
                     Enemy.Health = Enemy.Health -Player.AttackDamage
                     state = "Enemy Attack"
+                    
                 end
             end
     
             if x >= DefendbuttonX and x <= DefendbuttonX + DefendbuttonWidth
             and y >= DefendbuttonY and y <= DefendbuttonY + DefendbuttonHeight then
                 if Player.Alive then
-
+                    DefendButtonTable.anim = DefendButtonTable.animations.pressed
                     Player.Defence = Player.Defence + love.math.random(8, 10,14)
                     state = "Enemy Attack"
                 end
@@ -233,6 +249,8 @@ function EnemyState(dt)
                 Enemy.Timer = Enemy.Timer - dt
             end
             if Enemy.Timer <= 0 then
+                AttackButtonTable.anim = AttackButtonTable.animations.notpressed
+                DefendButtonTable.anim = DefendButtonTable.animations.notpressed
                 EnemyAttacking()
             end
         end
@@ -245,7 +263,7 @@ function EnemyAttacking()
             Player.Health = Player.Health - Enemy.AttackDamage + Player.Defence
             Player.Defence = 0
             state = "Player Attack"  -- klein schreiben, wie oben geprüft
-            Enemy.Timer = 0.5
+            Enemy.Timer = 1
         end
     end
 end
