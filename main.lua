@@ -49,22 +49,38 @@ function love.load()
 
     Enemy.y = 176
     Enemy.x = 900
+    Enemy.maxHealth = 100
     Enemy.Health = 100
     Enemy.Alive = true
     Enemy.AttackDamage = love.math.random(11, 17)
     Enemy.Sprite = love.graphics.newImage('assets/Ork.png')
     Enemy.Timer = 1
 
-
-
+----------------------------------------------
+--                PLAYER                    --
+----------------------------------------------
     Player = {}
     Player.y = 176
     Player.x = -300
+    Player.maxHealth = 100
     Player.Health = 100
+    Player.maxXP = 100
+    Player.XP = 0
     Player.Defence = 0
     Player.Alive = true
     Player.AttackDamage = love.math.random(14, 20)
     Player.Sprite = love.graphics.newImage('assets/Lucky.png')
+    inventory = {
+        HealthPotion = {
+        name = "HealthPotion",
+        quantity = 3,
+        description = "Restore 50 HP",
+        HealAmount = 50
+        }
+    }
+
+
+
 
 
 
@@ -115,6 +131,7 @@ function love.update(dt)
     end
 
 
+    love.draw()
 
 
 -----------------------------------------------------
@@ -123,13 +140,12 @@ function love.update(dt)
     if Enemy.Alive == false then
 
         state = "BattleWon"
-        Enemy.Health = 100
-        Player.Health = 100
-        Player.y = 176
-        Player.x = -800
+        Enemy.Health = Enemy.maxHealth
         Enemy.y = 176
         Enemy.x = 900
+        Player.XP = Player.XP + love.math.random(5, 105)
         Enemy.Alive = true
+        inventory.HealthPotion.quantity = inventory.HealthPotion.quantity +1
         AttackButtonTable.anim = AttackButtonTable.animations.notpressed
         DefendButtonTable.anim = DefendButtonTable.animations.notpressed
     end
@@ -137,8 +153,8 @@ function love.update(dt)
     if Player.Alive == false then
         state = "Lose"
         Player.Alive = true
-        Enemy.Health = 100
-        Player.Health = 100
+        Enemy.Health = Enemy.maxHealth 
+        Player.Health = Player.maxHealth
         Player.y = 176
         Player.x = -900
         Enemy.y = 176
@@ -152,8 +168,48 @@ function love.update(dt)
     EnemyState(dt)
     AttackButtonTable.anim:update(dt)
     DefendButtonTable.anim:update(dt)
+
+
+    if Player.XP >= Player.maxXP then
+        Player.XP = 0
+        Player.maxXP = Player.maxXP * 1.05
+        Player.maxHealth = Player.maxHealth + 10
+        inventory.HealthPotion.quantity = inventory.HealthPotion.quantity + 1
+    end
+
+
 end
 
+function love.keypressed(key)
+    if key == "return" then
+        usePotion()
+    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------
+--                                           DRAW FUNCTION                                                   --
+---------------------------------------------------------------------------------------------------------------
 function love.draw()
     love.graphics.setFont(PixelFont)
     love.graphics.draw(Background, 0, 0, 0, 14)
@@ -175,15 +231,67 @@ function love.draw()
 --                HEALTH BARS                      --
 -----------------------------------------------------
     if Player.Alive then    
-    love.graphics.print("HP " ..Player.Health, 130, 150, 0, 1, 1)
+    love.graphics.print(Player.Health .."/" ..Player.maxHealth .." HP", Player.x, 200, 0, 1, 1)
+    end
+
+    if Player.Alive then    
+    love.graphics.print(Player.XP .."/" ..Player.maxXP .."XP", Player.x, 158, 0, 1, 1)
     end
 
     if Enemy.Alive then
-        love.graphics.print("HP " ..Enemy.Health, 630, 150, 0, 1, 1)
+        love.graphics.print(Enemy.Health .."/" ..Enemy.maxHealth .." HP", Enemy.x, 200, 0, 1, 1)
     end
 
 
+    love.graphics.print("HealthPotion: " .. inventory.HealthPotion.quantity, 40, 450)
+    love.graphics.print(inventory.HealthPotion.description, 40, 480)
+    love.graphics.print("Press Enter to use Heal Potion", 40, 540)
 
+
+
+
+------------------------------------------------------------------------------------------------------
+--                                      Player HEALTHBAR                                            --
+------------------------------------------------------------------------------------------------------
+
+    love.graphics.setColor(0, 0.4, 0)  
+    love.graphics.rectangle("fill", Player.x, Player.y, 200, 20)  
+
+
+    love.graphics.setColor(0, 0.8, 0)  
+    local healthWidth = (Player.Health / Player.maxHealth) * 200
+    love.graphics.rectangle("fill", Player.x, Player.y, healthWidth, 20)
+
+
+    love.graphics.setColor(1, 1, 1)
+
+------------------------------------------------------------------------------------------------------
+--                                      Player XP Bar                                               --
+------------------------------------------------------------------------------------------------------
+
+
+    love.graphics.setColor(0.4, 0, 0.4)  
+    love.graphics.rectangle("fill", Player.x, Player.y - 40, 200, 20)  
+
+
+    love.graphics.setColor(0.8, 0, 0.8)  
+    local xpWidth = (Player.XP / Player.maxXP) * 200
+    love.graphics.rectangle("fill", Player.x, Player.y - 40, xpWidth, 20)
+
+
+    love.graphics.setColor(1, 1, 1)
+------------------------------------------------------------------------------------------------------
+--                                  ENEMY HEALTHBAR                                                 --
+------------------------------------------------------------------------------------------------------
+    
+    love.graphics.setColor(0.4, 0, 0)  
+    love.graphics.rectangle("fill", Enemy.x, Enemy.y, 200, 20)  
+    love.graphics.setColor(0.8, 0, 0)  
+    local healthWidth = (Enemy.Health / Enemy.maxHealth) * 200
+    love.graphics.rectangle("fill", Enemy.x, Enemy.y, healthWidth, 20)
+
+
+    love.graphics.setColor(1, 1, 1)
 
 
 
@@ -263,6 +371,25 @@ function EnemyAttacking()
             Player.Defence = 0
             state = "Player Attack"
             Enemy.Timer = 1
+        end
+    end
+end
+
+
+
+
+function usePotion()
+    if Player.Health < 100 then
+
+        local item = inventory["HealthPotion"]  -- immer HealthPotion
+        if item and item.quantity > 0 then
+            -- Spieler heilen
+            Player.Health = math.min(Player.Health + item.HealAmount, Player.maxHealth)
+            -- Menge reduzieren
+            item.quantity = item.quantity - 1
+            print(item.name .. " used! Player health: " .. Player.Health)
+        else
+            print("No HealthPotion left!")
         end
     end
 end
